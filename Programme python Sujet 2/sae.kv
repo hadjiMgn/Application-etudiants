@@ -1,0 +1,792 @@
+#:kivy 1.11
+#:import NoTransition kivy.uix.screenmanager.NoTransition
+
+WindowManager:
+    Connexion:
+    SecondWindow:
+    InscriptionEtu:
+    InscriptionProf:
+    EtuHome:
+    ImgEtu:
+    ProfHome:
+<Connexion>:
+    name : "Connexion"
+    email: email
+    passwd: passwd
+    log:log
+    vision: vision
+
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    GridLayout:
+        cols: 1
+        size: (root.width,root.height)
+        spacing: 10
+        
+        TextInput:
+            id: email
+            hint_text:"Email"
+            multiline: False
+
+        TextInput:
+            id: passwd
+            hint_text:"mot de passe"
+            multiline: False
+            password: True
+
+        Label:
+            text: root.my_text
+            font_size: 35
+            size_hint: (1, 0.1)
+            background_color: (1, 1, 1, 0)
+
+        BoxLayout:
+            Label:
+                text:"Afficher le mot de passe"
+                font_size: 20
+            CheckBox:
+                size_hint: (1, 1)
+                on_press: app.toggle_password_visibility(self)
+                active: False
+                id: vision
+                background_normal: ""
+                background_color: (0, 0, 0.4, 0.4)
+                border: (8, 8, 8, 8)
+                border_radius: [20]
+                color: (0.1, 0.4, 0, 1)
+
+
+        
+        Button:
+            id:log
+            text: "Connexion"
+            font_size: 25
+            on_press: 
+                app.connex()
+                app.recup_matieres_notes() if app.can_connect else app.inactif()
+                app.page_infos_etu() if app.can_connect and app.is_etu else app.inactif()
+
+            background_normal: ""
+            background_color: (0, 0, 0.4, 0.4)
+            border: (8, 8, 8, 8)
+            border_radius: [20]
+
+
+        GridLayout:
+            cols: 2
+            size: (root.width,root.height)
+            spacing: 10
+            Button:
+                text: "Inscription étudiant"
+                font_size: 25
+                on_release:
+                    app.root.current = "InscriptionEtu"
+                    root.manager.transition = NoTransition()                
+            Button:
+                text: "Inscription prof"
+                font_size: 25
+                on_release:
+                    app.root.current = "InscriptionProf"
+                    root.manager.transition = NoTransition()
+
+<SecondWindow>:
+    name : "second"
+
+    GridLayout:
+        cols: 1
+        size: (root.width,root.height)
+
+        Label:
+            text: "Seconde fenêtre"
+            font_size: 32
+
+        Button:
+            text: "Retourner en arrière"
+            font_size: 32
+            on_release: 
+                app.root.current = "Connexion"
+                root.manager.transition = NoTransition()
+
+<InscriptionEtu>:
+    name: "InscriptionEtu"
+    nom: nom
+    prenom: prenom
+    email: email
+    annee: annee
+    matiere: matiere
+    mdp: mdp
+    erreur: erreur
+    img:img
+    
+
+
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+    GridLayout:
+        cols: 2
+        size: (root.width,root.height)
+        spacing: 20
+        padding: 20
+
+        Label:
+            text: "Entrez votre nom:"
+            font_size: 20
+            size_hint_y: None
+            height: 30
+
+        TextInput:
+            id: nom
+            multiline: False
+
+        Label:
+            text: "Entrez votre prénom:"
+            font_size: 20
+            size_hint_y: None
+            height: 30
+
+        TextInput:
+            id: prenom
+            multiline: False
+
+        Label:
+            text: "Votre Email:"
+            font_size: 20
+            size_hint_y: None
+            height: 30
+
+        TextInput:
+            id: email
+            multiline: False
+
+        Label:
+            text: "Votre année d'étude:"
+            font_size: 20
+            size_hint_y: None
+            height: 30
+
+        Spinner:
+            id: annee
+            text: "Séléctionnez votre année d'étude"
+            values: ["1A", "2A"]
+        
+        Label:
+            text: "Séléctionnez votre spécialité :"
+            font_size: 20
+            size_hint_y: None
+            height: 30
+
+        Spinner:
+            id: matiere
+            text: "Séléctionnez une matière"
+            values: ["IA", "Cybersécurité"]
+
+        
+        Label:
+            text: "Sélectionnez votre image:"
+            font_size: 20
+            size_hint_y: None
+            height: 30
+
+        Button:
+            id:img
+            text: "Séléctionnez votre image"
+            font_size: 25
+            on_release:
+                app.root.current = "ImgEtu"
+                root.manager.transition = NoTransition()
+
+        Label:
+            text: "Entrez un mot de passe"
+            font_size: 20
+            size_hint_y: None
+            height: 30
+
+        TextInput:
+            id: mdp
+            multiline: False
+            password: True
+
+        
+        Button:
+            text: "Retour"
+            font_size: 25
+            size_hint: 0.5, None
+            height: 50
+            background_color: 1, 1, 1, 1
+            on_release:
+                app.root.current = "Connexion"
+                root.manager.transition = NoTransition()
+            on_press:
+                app.reinitialise_form_etu()
+
+        Button:
+            text: "Valider"
+            font_size: 25
+            size_hint: 0.5, None
+            height: 50
+            background_color: 1, 1, 1, 1
+            on_release: 
+                app.verif_formulaire_etu() #vérifie si tous les champs du formulaire sont remplis
+                app.verif_mail_etu()
+                app.enregistrement_etudiant() if app.verif_etu and app.verif_email_etu else app.inactif() #si tout est rempli, envoie des champs vers la bdd
+                app.envoie_notes() if app.verif_etu and app.verif_email_etu else app.inactif()
+                app.reinitialise_form_etu() if app.verif_etu and app.verif_email_etu else app.inactif() #si tous est rempli, reinitialise tous les champs
+                app.same_mail_etu() if not app.verif_email_etu and app.verif_etu else app.inactif()
+                
+
+        GridLayout:
+            cols: 1
+            Label:
+                id: erreur
+                text: ""
+
+<ImgEtu>:
+    name:"ImgEtu"
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    GridLayout:
+        cols: 1
+        size: (root.width,root.height)
+        spacing: 10
+        Image:
+            id: img
+            source:""
+        FileChooserIconView:
+            id: filechooser
+            on_submit: app.recup_chemin(filechooser.path, filechooser.selection)
+        Button:
+            text: "Valider"
+            on_release: 
+                app.root.current = "InscriptionEtu"
+                root.manager.transition = NoTransition()
+                app.change_text()
+
+<InscriptionProf>:
+    name: "InscriptionProf"
+    nom: nom
+    prenom: prenom
+    email: email
+    mdp: mdp
+    erreur: erreur
+
+
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+    RelativeLayout:
+        orientation:'vertical'
+
+        pos : self.pos
+        size : root.size
+        Label:
+            text: "Entrez votre nom:"
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.30, 'center_y':.85}
+
+
+        TextInput:
+            id: nom
+            multiline: False
+            markup: True
+            font_size:20
+            size_hint: 0.4,0.1
+            pos_hint:{'center_x':.65, 'center_y':.85}
+
+        Label:
+            text: "Entrez votre prénom:"
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.30, 'center_y':.70}
+
+        TextInput:
+            id: prenom
+            multiline: False
+            font_size:20
+            size_hint: 0.4,0.1
+            pos_hint:{'center_x':.65, 'center_y':.70}
+
+        Label:
+            text: "Votre Email:"
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.30, 'center_y':.55}
+
+        TextInput:
+            id: email
+            multiline: False
+            font_size:20
+            size_hint: 0.4,0.1
+            pos_hint:{'center_x':.65, 'center_y':.55}
+
+        Label:
+            text: "Entrez un mot de passe:"
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.30, 'center_y':.40}
+
+        TextInput:
+            id: mdp
+            multiline: False
+            password: True
+            font_size:20
+            size_hint: 0.4,0.1
+            pos_hint:{'center_x':.65, 'center_y':.40}
+
+        
+                
+
+        Button:
+            text: "Retour"
+            font_size:20
+            size_hint: 0.3,0.1
+            pos_hint:{'center_x':.3, 'center_y':.2}
+            background_color: 1, 1, 1, 1
+            on_release:
+                app.root.current = "Connexion"
+                root.manager.transition = NoTransition()
+            on_press:
+                app.reinitialise_form_prof()
+
+        Button:
+            text: "Valider"
+            font_size:20
+            size_hint: 0.3,0.1
+            pos_hint:{'center_x':.7, 'center_y':.2}
+            background_color: 1, 1, 1, 1
+            on_release: 
+                app.verif_formulaire_prof() #vérifie si tous les champs du formulaire sont remplis
+                app.verif_mail_prof()
+                app.enregistrement_prof() if app.verif_prof and app.verif_email_prof else app.inactif() #si tout est rempli, envoie des champs vers la bdd
+                app.reinitialise_form_prof() if app.verif_prof and app.verif_email_prof else app.inactif() #si tous est rempli, reinitialise tous les champs
+                app.same_mail_prof() if not app.verif_email_prof and app.verif_prof else app.inactif()
+
+        Label:
+            id: erreur
+            text: ""
+            font_size:16
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.3}
+            
+
+        
+
+<EtuHome>:
+    name : "EtuHome"
+    bvn:bvn
+    math:math
+    reseau:reseau
+    telecom:telecom
+    prog:prog
+    anglais:anglais
+    name_specialite: name_specialite
+    specialite: specialite
+    photo: photo
+    mail:mail
+    annee:annee
+    moyenne:moyenne
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    RelativeLayout:
+        orientation:'vertical'
+
+        pos : self.pos
+        size : root.size
+
+        Image:
+            id: photo
+            source: ''
+            size_hint:0.4,None
+            pos_hint:{'center_x':.5, 'center_y':.9}
+
+        Label:
+            text: "Bienvenue:"
+            markup: True
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.25, 'center_y':.95}
+
+        Label:
+            id:bvn
+            text: ""
+            markup: True
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.25, 'center_y':.90}
+
+        Label:
+            id:mail
+            text: ""
+            markup: True
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.7, 'center_y':.96}
+
+        Label:
+            id:annee
+            text: ""
+            markup: True
+            font_size:35
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.7, 'center_y':.90}
+
+        Button:
+            text: "Se Deconnecter"
+            font_size: 18
+            size_hint: .3,.1
+            pos_hint:{'center_x':.1, 'center_y':.8}
+            height: 20
+            background_color: 1, 1, 1, 1
+            on_release:
+                app.reinitialise_champs_connexion()
+                app.root.current = "Connexion"
+                root.manager.transition = NoTransition()
+
+        Label:  
+            text:"Maths"
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.30, 'center_y':.70}
+        Label:
+            id:math
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.75, 'center_y':.70}
+        Label:    
+            text:"Réseau"
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.31, 'center_y':.60}
+        Label:
+            id:reseau
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.75, 'center_y':.60}
+        Label:
+            text:"Programmation"
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.38, 'center_y':.50}
+        Label:
+            id:prog
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.75, 'center_y':.50}
+        Label:
+            text:"Anglais"
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.31, 'center_y':.40}
+        Label:
+            id:anglais
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.75, 'center_y':.40}
+        Label:
+            text:"Télécom"
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.32, 'center_y':.30}
+        Label:
+            id:telecom
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.75, 'center_y':.30}
+
+        Label:
+            id: name_specialite
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.33, 'center_y':.20}
+        Label:
+            id:specialite
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.75, 'center_y':.20}
+        Label:
+            text:"Moyenne totale"
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.38, 'center_y':.10}
+        Label:
+            id:moyenne
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.75, 'center_y':.10}
+        Label:
+            id:moyenne
+            text:""
+            markup: True
+            font_size:30
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.75, 'center_y':.10}
+
+
+<ProfHome>:
+    name : "ProfHome"
+    math:math
+    name_math:name_math
+    reseau:reseau
+    name_reseau:name_reseau
+    telecom:telecom
+    name_telecom:name_telecom
+    prog:prog
+    name_prog:name_prog
+    anglais:anglais
+    name_anglais:name_anglais
+    special:special
+    name_spe:name_spe
+    selection: selection
+    error: error
+    photo: photo
+    note_mod:note_mod
+    matiere:matiere
+    bout_mod:bout_mod
+    mail:mail
+    annee:annee
+    prenom:prenom
+    note_error:note_error
+    canvas.before:
+
+
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    RelativeLayout:
+        orientation:'vertical'
+
+        pos : self.pos
+        size : root.size
+        Image:
+            id: photo
+            source: ''
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.85, 'center_y':.9}
+
+        Label:
+            text: "Entrez le nom d'un étudiant"
+            markup: True
+            font_size:15
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.2, 'center_y':.9}
+
+        TextInput:
+            id: selection
+            multiline: False
+            markup: True
+            font_size:15
+            size_hint: 0.2,0.06
+            pos_hint:{'center_x':.45, 'center_y':.9}
+
+        Button:
+            text: "Valider"
+            markup: True
+            font_size:15
+            size_hint: 0.1,0.08
+            pos_hint:{'center_x':.65, 'center_y':.9}
+            on_release:
+                app.reset_infos()
+                app.page_infos_prof()
+
+        Label:
+            id:mail
+            text: ""
+            markup: True
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.75}
+        Label:
+            id:annee
+            text: ""
+            markup: True
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.2, 'center_y':.75}
+        Label:
+            id:prenom
+            text: ""
+            markup: True
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.85, 'center_y':.75}            
+                
+        Label:
+            id:error
+            text: ""
+            font_size:15
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.75}
+
+        Button:
+            text: "Se déconnecter"
+            font_size: 16
+            markup: True
+            font_size:15
+            size_hint: 0.2,0.1
+            pos_hint:{'center_x':.5, 'center_y':.15}
+            on_release:
+                app.reinitialise_champs_connexion()
+                app.reset_page_prof()
+                app.root.current = "Connexion"
+                root.manager.transition = NoTransition()
+
+        Label:
+            text: "Modifiez une note:"
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.23, 'center_y':.65}
+        TextInput:
+            id: note_mod
+            multiline: False
+            markup: True
+            font_size:16
+            size_hint: 0.1,0.06
+            pos_hint:{'center_x':.45, 'center_y':.65}
+        Label:
+            id:note_error
+            text:""
+            font_size:17
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.45, 'center_y':.56}
+        Spinner:
+            id: matiere
+            text: "Séléctionnez la matière"
+            values: []
+            font_size:15
+            size_hint: 0.25,0.08
+            pos_hint:{'center_x':.7, 'center_y':.65}
+        Button:
+            id:bout_mod
+            text: "Modifier"
+            markup: True
+            font_size:15
+            size_hint: 0.1,0.08
+            pos_hint:{'center_x':.9, 'center_y':.65}
+            on_release:
+                app.modify_note()
+                app.recup_matieres_notes()
+
+        Label:
+            id:name_math
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.29, 'center_y':.50}
+        Label:
+            id:math
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.50}
+
+        Label:   
+            id:name_reseau 
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.3, 'center_y':.45}
+        Label:
+            id:reseau
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.45}
+        Label:
+            id:name_prog
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.35, 'center_y':.40}
+        Label:
+            id:prog
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.40}
+        Label:
+            id:name_anglais
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.3, 'center_y':.35}
+        Label:
+            id:anglais
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.35}
+        Label:
+            id:name_telecom
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.31, 'center_y':.30}
+        Label:
+            id:telecom
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.30}
+
+        Label:
+            text:""
+            id: name_spe
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.31, 'center_y':.25}
+        Label:
+            id:special
+            text:""
+            font_size:20
+            size_hint: 0.2,0.2
+            pos_hint:{'center_x':.5, 'center_y':.25}
+            
+        
